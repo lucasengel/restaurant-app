@@ -59,39 +59,22 @@ const Dashboard: React.FC = () => {
   }
 
   useEffect(() => {
-    api.get('/foods').then(({ data }) => {
-      const filterItems = (
-        foodItems: Food[],
-        category?: number,
-        searchQuery?: string,
-      ): Food[] => {
-        let filtered = foodItems;
+    api
+      .get('/foods', {
+        params: {
+          category_like: selectedCategory,
+          name_like: searchValue,
+          description_like: searchValue,
+        },
+      })
+      .then(({ data }) => {
+        const formattedItems = data.map((item: Food) => ({
+          ...item,
+          formattedPrice: formatValue(item.price),
+        }));
 
-        if (category) {
-          filtered = foodItems.filter(food => food.category === category);
-        }
-
-        if (searchQuery) {
-          filtered = filtered.filter(food => {
-            return (
-              food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              food.description.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-          });
-        }
-
-        return filtered;
-      };
-
-      const filteredItems = filterItems(data, selectedCategory, searchValue);
-
-      const formattedItems = filteredItems.map(item => ({
-        ...item,
-        formattedPrice: formatValue(item.price),
-      }));
-
-      setFoods(formattedItems);
-    });
+        setFoods(formattedItems);
+      });
   }, [selectedCategory, searchValue]);
 
   useEffect(() => {
