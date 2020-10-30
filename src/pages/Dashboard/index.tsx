@@ -59,52 +59,39 @@ const Dashboard: React.FC = () => {
   }
 
   useEffect(() => {
-    async function loadFoods(): Promise<void> {
-      api.get('/foods').then(({ data }) => {
-        const filterItems = (
-          foodItems: Food[],
-          category?: number,
-          searchQuery?: string,
-        ): Food[] => {
-          let filtered = foodItems;
+    api.get('/foods').then(({ data }) => {
+      const filterItems = (
+        foodItems: Food[],
+        category?: number,
+        searchQuery?: string,
+      ): Food[] => {
+        let filtered = foodItems;
 
-          if (category) {
-            filtered = foodItems.filter(food => food.category === category);
-          }
+        if (category) {
+          filtered = foodItems.filter(food => food.category === category);
+        }
 
-          if (searchQuery) {
-            filtered = filtered.filter(food => {
-              return (
-                food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                food.description
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase())
-              );
-            });
-          }
+        if (searchQuery) {
+          filtered = filtered.filter(food => {
+            return (
+              food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              food.description.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+          });
+        }
 
-          return filtered;
-        };
+        return filtered;
+      };
 
-        const filteredItems = filterItems(data, selectedCategory, searchValue);
+      const filteredItems = filterItems(data, selectedCategory, searchValue);
 
-        const formattedItems = filteredItems.map(
-          ({ id, name, description, thumbnail_url, price, category, }) => ({
-            id,
-            name,
-            description,
-            thumbnail_url,
-            price,
-            category,
-            formattedPrice: formatValue(price),
-          }),
-        );
+      const formattedItems = filteredItems.map(item => ({
+        ...item,
+        formattedPrice: formatValue(item.price),
+      }));
 
-        setFoods(formattedItems);
-      });
-    }
-
-    loadFoods();
+      setFoods(formattedItems);
+    });
   }, [selectedCategory, searchValue]);
 
   useEffect(() => {
